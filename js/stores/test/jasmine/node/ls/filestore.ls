@@ -1,5 +1,5 @@
-FileStore = require "../../../../lib/filestore"
 require! { fs, jefri }
+require "../../../../lib/jefri-stores"
 
 describe "FileStore", !(a)->
 	user = au = runtime = null
@@ -28,8 +28,8 @@ describe "FileStore", !(a)->
 
 	it "saves", !->
 		runs !->
-			filestore = new jefri.FileStore runtime: runtime
-			runtime.save_new filestore .then !(transaction)->
+			runtime.store jefri.FileStore
+			runtime.save_new!then !(transaction)->
 				expect transaction .not .toBeNull!
 				# expect transction.entities.length .toBe 2
         		# nkeys = _.keys(transaction.entities[0]);

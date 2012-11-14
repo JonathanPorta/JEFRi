@@ -42,8 +42,6 @@
 				contextUri: contextUri,
 				# If an entity already exists, does JEFRi update or replace?
 				updateOnIntern: true,
-				# The constructor for the default store.
-				store: JEFRi.LocalStore
 		settings <<<< options
 
 		@ <<<<
@@ -83,9 +81,6 @@
 					type = @_modified[entity._type!]
 					type[id] = null
 					delete type[id]
-
-		# Build the default store
-		@_store = new @settings.store {runtime: @}
 
 		# #### Private helper functions
 		# These handle most of the heavy lifting of building Entity classes.
@@ -465,8 +460,7 @@
 		# Return a new instance of an object described in the context.
 		build: (type, obj) ->
 			def = @definition(type)
-			if !def
-				throw "JEFRi::Runtime::build '#{type}' is not a defined type in this context."
+			if not def then throw "JEFRi::Runtime::build '#{type}' is not a defined type in this context."
 			obj = obj || {}
 			# We are going to build the new entity first, then, if there is a local
 			# instance, we will extend the local instance with the new instance.
@@ -507,17 +501,11 @@
 			if (t > -1) then @_new[t to t] = []
 			@
 
-		# Prepare a new transaction
-		transaction: (spec) ->
-			spec = spec || []
-			return new JEFRi.Transaction(spec, @_store)
-
 		# Return an interned entity from the local instance matching spec.
 		#
 		# Spec requires an _type property and the entity key.
 		find: (spec) ->
-			if (typeof spec is "string")
-				spec = {_type : spec}
+			if typeof spec is "string" then spec = _type: spec
 			to_return = []
 			r = @definition(spec._type)
 			results = @_instances[spec._type]
@@ -541,7 +529,7 @@
 		get: (spec) ->
 			spec = if _.isArray(spec) then spec else [spec]
 			results = {}
-			transaction = @transaction!
+			transaction = new JEFRi.Transaction!
 			deferred = _.Deferred!
 
 			results.push = pushResult
@@ -584,34 +572,3 @@
 				d.resolve(data[_type].pop!, meta)
 
 			return d.promise!
-
-		# Save all the new entities.
-		save_new: (store) ->
-			transaction = @transaction!
-			@saving <: {}
-
-			#Add all new entities to the transaction
-			transaction.add(@_new)
-
-			return @_save(transaction, store)
-
-		# Save all entities with changes, including new entities.
-		save_all: (store) ->
-			transaction = @transaction!
-			@saving <: {}
-
-			#Add all new entities to the transaction
-			# Modified is keyed by type...
-			for t, modified of @_modified
-				# ...and each key contains an object of entity instances
-				for k, entity of modified
-					entity._persist(transaction)
-
-			for neu in @_new
-				@persist neu
-
-			@_save transaction, store
-
-		_save: (transaction, store) ->
-			store = store || @_store
-			return store.execute('persist', transaction).then _.bind(@expand, @)

@@ -30,8 +30,6 @@ test("Runtime Prototype", function() {
 	ok(runtime.build, "JEFRi.Runtime::build");
 	ok(runtime.intern, "JEFRi.Runtime::intern");
 	ok(runtime.expand, "JEFRi.Runtime::expand");
-	ok(runtime.save_new, "JEFRi.Runtime::save_new");
-	ok(runtime.save_all, "JEFRi.Runtime::save_all");
 });
 
 asyncTest("Instantiate Runtime", function() {

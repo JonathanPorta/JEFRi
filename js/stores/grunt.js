@@ -16,7 +16,15 @@ module.exports = function(grunt) {
 		livescript: {
 			src: {
 				files: {
-					'build/*.js': 'src/*.ls'
+					'build/*.js': ['src/object-store.ls', 'src/local-store.ls', 'src/file-store.ls', 'src/runtime.ls']
+				},
+				options: {
+					bare: true
+				}
+			},
+			qunit: {
+				files: {
+					"test/qunit/min/ls/compiled/*.js": ["test/qunit/min/ls/*ls"]
 				},
 				options: {
 					bare: true
@@ -30,7 +38,7 @@ module.exports = function(grunt) {
 		},
 		concat: {
 			lib: {
-				src: ['build/*.js'],
+				src: ['build/object-store.js', 'build/local-store.js', 'build/file-store.js', 'build/runtime.js'],
 				dest: 'build/<%= pkg.name %>.full.js'
 			},
 			node: {
@@ -44,6 +52,10 @@ module.exports = function(grunt) {
 			min: {
 				src: ['src/min/pre.js', 'build/<%= pkg.name %>.full.js', 'src/min/post.js'],
 				dest: 'lib/<%= pkg.name %>.min.js'
+			},
+			qunitMin: {
+				src: ['test/qunit/min/js/*.js', 'test/qunit/min/ls/tests.js'],
+				dest: 'test/qunit/min/tests.js'
 			}
 		},
 		copy: {
@@ -51,9 +63,18 @@ module.exports = function(grunt) {
 				files: {
 					'build/': "src/*.js"
 				}
+			},
+			lib: {
+				files: {
+					'lib/': "build/*.js"
+				}
 			}
 		},
-
+		qunit: {
+			min: {
+				src: ['http://localhost:8000/test/qunit/min/qunit.html']
+			}
+		},
 		jasmine_node: {
 			projectRoot: 'test/jasmine/node',
 			specFolderName: 'spec',
@@ -61,8 +82,10 @@ module.exports = function(grunt) {
 			matchall: true
 		},
 		server: {
-			port: 8000,
-			base: "."
+			test: {
+				port: 8000,
+				base: '.'
+			}
 		}
 	});
 
@@ -72,8 +95,9 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('build', 'livescript:src concat:lib');
 	grunt.registerTask('package', 'concat:node');
+	grunt.registerTask('qunitTests', 'livescript:qunit concat:qunitMin qunit:min');
 	grunt.registerTask('jasmine', 'livescript:jasmine jasmine_node');
 	grunt.registerTask('testServer', 'server');
-	grunt.registerTask('tests', 'testServer jasmine');
+	grunt.registerTask('tests', 'testServer jasmine qunitTests');
 	grunt.registerTask('default', 'clean build package tests');
 };

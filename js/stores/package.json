@@ -1,7 +1,7 @@
 {
-  "name": "filestore",
-  "title": "Filestore",
-  "description": "The best project ever.",
+  "name": "jefri-stores",
+  "title": "JEFRi Stores",
+  "description": "A collection of PersistanceStores for JEFRi runtimes.",
   "version": "0.1.0",
   "homepage": "https://github.com/DavidSouther/JEFRi",
   "author": {
@@ -21,7 +21,10 @@
       "url": "https://github.com/DavidSouther/JEFRi/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "lib/filestore",
+  "main": "lib/stores",
+  "directories": {
+    "lib": "./lib"
+  },
   "engines": {
     "node": "*"
   },
@@ -37,7 +40,8 @@
     "grunt-contrib": "*",
     "grunt-jasmine-node": "*",
     "grunt-jasmine": "*",
-    "grunt": "~0.3.17"
+    "grunt": "~0.3.17",
+    "superscore": "*"
   },
   "keywords": []
 }
